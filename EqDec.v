@@ -18,11 +18,11 @@ Class eqDec A := {
 
 Notation "a =? b" := (eqDecide a b).
 
-Instance eqDecNat : eqDec nat.
+Global Instance eqDecNat : eqDec nat.
   constructor. decide equality.
 Defined.
 
-Instance eqDecProd {A B} `{eqDec A} `{eqDec B} : eqDec (A * B).
+Global Instance eqDecProd {A B} `{eqDec A} `{eqDec B} : eqDec (A * B).
   constructor.
   intros.
   destruct a as [a b].
@@ -36,7 +36,7 @@ Instance eqDecProd {A B} `{eqDec A} `{eqDec B} : eqDec (A * B).
   (* constructor; repeat decide equality; apply eqDecide.  *)
 Defined.
 
-Instance eqDecSigT {A B} `{eqDec A} `{forall a:A, eqDec (B a)} : eqDec {a:A & B a}.
+Global Instance eqDecSigT {A B} `{eqDec A} `{forall a:A, eqDec (B a)} : eqDec {a:A & B a}.
   constructor. intros x x'. 
   dep_destruct x; dep_destruct x'.
   match goal with a:A, a':A |- _ => destruct (a =? a') end.
@@ -47,11 +47,11 @@ Instance eqDecSigT {A B} `{eqDec A} `{forall a:A, eqDec (B a)} : eqDec {a:A & B 
   - apply right. crush.
 Defined.
 
-Instance eqDecSigT' {A B} `{eqDec A} `{forall a:A, eqDec (B a)} : eqDec (sigT B).
+Global Instance eqDecSigT' {A B} `{eqDec A} `{forall a:A, eqDec (B a)} : eqDec (sigT B).
   apply eqDecSigT.
 Defined.
 
-Instance eqDecSig {A P} `{eqDec A} : eqDec (@sig A P).
+Global Instance eqDecSig {A P} `{eqDec A} : eqDec (@sig A P).
   constructor.
   intros [a ?] [a' ?].
   destruct (a =? a').
@@ -63,24 +63,24 @@ Instance eqDecSig {A P} `{eqDec A} : eqDec (@sig A P).
     congruence.
 Defined.  
 
-Instance eqDecSum {A B} `{eqDec A} `{eqDec B} : eqDec (A + B).
+Global Instance eqDecSum {A B} `{eqDec A} `{eqDec B} : eqDec (A + B).
   constructor.
   decide equality; apply eqDecide.
 Defined.
 
-Instance eqDecList {A} `{eqDec A} : eqDec (list A).
+Global Instance eqDecList {A} `{eqDec A} : eqDec (list A).
   constructor.
   intros.
   apply list_eq_dec.
   apply eqDecide.
 Defined.
 
-Instance eqDecBool : eqDec bool.
+Global Instance eqDecBool : eqDec bool.
   constructor.
   decide equality.
 Defined.
 
-Instance eqDecUnit : eqDec unit.
+Global Instance eqDecUnit : eqDec unit.
   constructor.
   decide equality.
 Defined.

@@ -16,7 +16,7 @@ Class enumerable A := {
   enumerateContainsEverything : forall a, In a enumerate
 }.
 
-Instance enumerableFree {A} `{@Free listSpaceSearch A} : enumerable A.
+Global Instance enumerableFree {A} `{@Free listSpaceSearch A} : enumerable A.
   refine {| enumerate := free A |}.
 Proof.
   exact freeOk.

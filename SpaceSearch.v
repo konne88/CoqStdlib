@@ -33,7 +33,7 @@ Section SpaceSearch.
 
   Arguments free _ [_].
 
-  Instance freeBool : Free bool. 
+  Global Instance freeBool : Free bool. 
     refine {|
       free := union (single true) (single false)
     |}.
@@ -45,7 +45,7 @@ Section SpaceSearch.
     - right. apply singleOk. reflexivity.
   Defined.
 
-  Instance freeSigT {A B} `{Free A} 
+  Global Instance freeSigT {A B} `{Free A} 
                           `{forall a:A, Free (B a)} : 
                             Free (sigT B).
     refine {|
@@ -63,7 +63,7 @@ Section SpaceSearch.
     reflexivity.
   Defined.
 
-  Instance freeProd {A B} `{Free A} `{Free B} : Free (A * B).
+  Global Instance freeProd {A B} `{Free A} `{Free B} : Free (A * B).
     refine {|
       free := bind (free A) (fun a => 
               bind (free B) (fun b =>
@@ -79,13 +79,13 @@ Section SpaceSearch.
     reflexivity.
   Defined.
 
-  Instance freeEmpty : Free Empty_set.
+  Global Instance freeEmpty : Free Empty_set.
     refine {| free := empty |}.
   Proof.
     intros [].
   Defined.
 
-  Instance freeUnit : Free unit.
+  Global Instance freeUnit : Free unit.
     refine {| free := single tt |}.
   Proof.
     intros [].
