@@ -25,3 +25,7 @@ Coercion bool2sumbool (b:bool) : {b=true} + {~(b=true)}.
   - left. reflexivity.
   - right. intro H. inversion H.
 Defined.
+
+Axiom ADMIT : forall A, A.
+
+

@@ -5,6 +5,7 @@ Require Import EqDec.
 Import ListNotations.
 Require Import Equality.
 Require Import Monad.
+Require Import Misc.
 
 Notation "f <$> l" := (map f l) (at level 35).
 
@@ -70,8 +71,6 @@ Fixpoint lookup {A} {l:list A} (i:index l) :=
 
 Arguments found [_ _ _].
 Arguments next [_ _ _] _.
-
-Axiom ADMIT : forall A, A.
 
 Instance indexEqDec {A} {l:list A} : eqDec (index l).
   constructor.
