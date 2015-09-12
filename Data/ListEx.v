@@ -6,6 +6,8 @@ Import ListNotations.
 Require Import Equality.
 Require Import Monad.
 
+Notation "f <$> l" := (map f l) (at level 35).
+
 Fixpoint concat {A} (l : list (list A)) : list A :=
   match l with
   | [] => []
@@ -23,9 +25,16 @@ Lemma concatIn {A} {a:A} l {L} : In a l -> In l L -> In a (concat L).
     crush.
 Qed.
 
-Notation "f <$> l" := (map f l) (at level 35).
+Lemma concat_app {A} {l l':list (list A)} : concat (l ++ l') = concat l ++ concat l'.
+  induction l.
+  - cbn. reflexivity.
+  - cbn in *.
+    rewrite IHl.
+    rewrite app_assoc.
+    reflexivity.
+Defined.
 
-Instance monadList : Monad list := {|
+Global Instance monadList : Monad list := {|
   ret A a := [a];
   bind A B l f := concat (f <$> l)
 |}.
@@ -39,18 +48,15 @@ Proof.
     + f_equal.
       intuition.
   - intros A B C l f g.
-    induction l; cbn in *.
-    + reflexivity.
-    + rewrite <- IHl.
-      cbn.
-      Search In.
-
-    extensionality v.
-
-idtac.
-- intros.
-intros l f.
-
+    induction l.
+    + cbn. reflexivity.
+    + cbn in *. 
+      rewrite <- IHl.
+      clear IHl.
+      rewrite map_app.
+      rewrite concat_app.
+      reflexivity.
+Defined.
 
 Inductive index {A} : list A -> Type :=
 | found a l : index (a::l)
