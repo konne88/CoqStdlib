@@ -16,3 +16,13 @@ Notation "X <- A ;; B" := (bind A (fun X => B))
 
 Notation "A ;; B" := (bind A (fun _ => B))
   (at level 100, right associativity).
+
+Global Instance monadOption : Monad option := {|
+  ret A a := Some a;
+  bind A B v f := match v with None => None | Some a => f a end
+|}.
+Proof.
+  - intros; reflexivity.
+  - intros ? []; reflexivity.
+  - intros ? ? ? [] ? ?; reflexivity.
+Defined.    
