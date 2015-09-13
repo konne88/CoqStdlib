@@ -8,6 +8,88 @@ Require Import Omega.
 Require Import Program.
 Import ListNotations.
 
+Module PartialMap.
+Section PartialMap.
+  Variable A : Type.
+  
+  Definition PartialMap (B:A->Type) := forall a, option (B a).
+
+  Context `{enumerable A}.
+
+  Definition isSome {T} (v:option T) :=
+    match v with Some _ => true | None => false end.
+
+  Definition size {B} (m:PartialMap B) : nat.
+    refine ((fix rec l := match l with 
+    | [] => 0
+    | a::l' => match m a with 
+                | None => 0 
+                | Some _ => 1 
+                end + rec l'
+    end) enumerate).
+  Defined.
+
+  Lemma emptySize {B} : @size B (fun _ => None) = 0.
+    unfold size.
+    induction enumerate.
+    - reflexivity.
+    - cbn in *.
+      rewrite IHl.
+      reflexivity.
+  Qed.
+
+  Lemma fullSize {B m} : @size B m = length enumerate -> forall a, m a = None -> False.
+    intros h a.
+  Admitted.
+
+  Definition map {B C} (m:PartialMap B) (f:forall a, B a -> C a) : PartialMap C :=
+    fun a => option_map (f a) (m a).
+
+  Lemma mapSize {B C m f} : @size B m = @size C (map m f).
+    unfold map.
+    unfold size.
+    induction enumerate.
+    - reflexivity.
+    - cbn in *.
+      rewrite IHl; clear IHl.
+      f_equal.
+      destruct (m a); reflexivity.
+  Qed.
+
+  Context `{eqDec A}.
+
+  Definition update {B} (m:PartialMap B) a (b:B a) : PartialMap B.
+    refine (fun a' => if a =? a' then _ else m a').
+    subst.
+    exact (Some b).
+  Defined.
+
+  Lemma updateSize {B m a b} : m a = None -> size (@update B m a b) = S (size m).
+  Admitted.
+
+End PartialMap.
+End PartialMap.
+
+Module Relation.
+Section Relation.
+
+Variable A : Type.
+Variable R : A -> A -> Type.
+
+Definition irreflexive := forall a, R a a -> False.
+
+Definition finiteIrreflexiveIsWellfounded `{enumerable A} `{irreflexive} : well_founded (fun a b => inhabited (R a b)).
+  unfold well_founded.
+  intro a.
+  constructor.
+  intro a'.
+Admitted.
+
+
+End Relation.
+End Relation.
+
+
 Section Graph.
 
 Class Graph := {
@@ -54,65 +136,59 @@ Definition edgeLt d s := inhabited (Edge s d).
 
 Context `{eqDec Vertex}.
 
-Definition nones {A B} `{enumerable A} (f:forall a:A, option (B a)) : nat.
-  refine ((fix rec l := match l with 
-  | [] => 0
-  | a::l' => match f a with 
-             | None => 0 
-             | Some _ => 1 
-             end + rec l'
-  end) enumerate).
-Defined.
+(*
+Arguments size [_ _ _] _.
+Arguments fullSize [_ _ _ _ _] _ _.
+Arguments map [_ _ _] _ _ _.
+Arguments update [_ _ _] _ _ _ _.
+*)
 
-Lemma nonesEmpty {A B} `{enumerable A} : nones (fun a => @None (B a)) = length enumerate.
-  induction enumerate.
-  - 
-Admitted.
-
+(*
 Definition accessDAC : well_founded edgeLt.
   unfold well_founded.
   intro root.
   refine ((fix rec n := 
-    match n return forall v (ps:forall s, option (Path' s v)), nones ps = n -> Acc edgeLt v with 
+    match n return forall v (ps:PartialMap Vertex (fun s => Path' s v)), n + size ps = length vertices -> Acc edgeLt v with 
     | 0 => _ 
     | S n' => _ 
-    end) (length vertices) root (fun _ => None) nonesEmpty).
-  - intros.
+    end) (length vertices) root (fun _ => None) _).
+  - intros v ps h.
     constructor.
     intros d [e].
     (* the last one cannot have children *)
     exfalso.
     destruct (ps d) eqn:?.
-    + (* we have a cycle *)
-      exfalso.
+    + exfalso.
       apply (dac v).
-      unfold cycle.
       unfold nonTrivialPath.
-      exact [d & (e, p)].
-    + (* cannot be none *)
-      admit.
+      cbn.
+      refine [d & (e, p)].
+    + cbn in *.
+      apply (fullSize h d).
+      intuition.
   - specialize (rec n').
     intros v ps ?.
     constructor.
     intros d [e].
     specialize (rec d).
     refine (rec _ _).
-    + intro s.
-      destruct (s =? v).
-      * subst.
-        refine (Some (step' refl' e)).
-      * refine (_ (ps s)).
-        intros []. {
-          intro p.
-          apply Some.
-          refine (step' p e).
-        } {
-          apply None.
-        }
-    + match goal with |- ?n = ?m => enough (S n = S m); intuition end.
+    + refine (map (update ps v refl') (fun _ p => step' p e)).
+    + rewrite <- H3.
+      cbn.
+      Check updateSize.
+      Check mapSize.
+      rewrite <- mapSize.
+      rewrite updateSize; [omega|].
+      destruct (ps v); [|reflexivity].
+      exfalso. 
+      apply (dac p).
+      
+
+match goal with |- ?n = ?m => enough (S n = S m); intuition end.
       rewrite <- H3; clear H3.
       admit.
 Admitted.
+*)
 
 Instance enumerablePaths {s} : enumerable {d : Vertex & Path s d}.
   refine (Fix accessDAC (fun s => enumerable {d : Vertex & Path s d}) _ s).
