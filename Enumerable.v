@@ -8,7 +8,6 @@ Require Import EqDec.
 Require Import Misc.
 Require Import Omega.
 Require Import KonneTactics.
-Require Import SpaceSearch.
 Import ListNotations.
 
 Class enumerable A := {
@@ -16,8 +15,3 @@ Class enumerable A := {
   enumerateContainsEverything : forall a, In a enumerate
 }.
 
-Global Instance enumerableFree {A} `{@Free listSpaceSearch A} : enumerable A.
-  refine {| enumerate := free A |}.
-Proof.
-  exact freeOk.
-Defined.

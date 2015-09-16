@@ -1,3 +1,4 @@
+Require Import Enumerable.
 Require Import List.
 Require Import CpdtTactics.
 Require Import JamesTactics.
@@ -6,7 +7,6 @@ Import ListNotations.
 Require Import Equality.
 Require Import Monad.
 Require Import Misc.
-Require Import Enumerable.
 
 Notation "f <$> l" := (map f l) (at level 35).
 
