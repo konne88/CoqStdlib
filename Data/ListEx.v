@@ -6,6 +6,7 @@ Import ListNotations.
 Require Import Equality.
 Require Import Monad.
 Require Import Misc.
+Require Import Enumerable.
 
 Notation "f <$> l" := (map f l) (at level 35).
 
@@ -59,6 +60,14 @@ Proof.
       reflexivity.
 Defined.
 
+Lemma bindIn {A B} {b:B} {l:list A} {f:A->list B} x : In x l -> In b (f x) -> In b (x <- l;; f x).
+  cbn.
+  intros.
+  apply (concatIn (f x)); intuition.
+  apply in_map.
+  intuition.
+Qed.
+
 Inductive index {A} : list A -> Type :=
 | found a l : index (a::l)
 | next  a l : index l -> index (a::l).
@@ -72,48 +81,86 @@ Fixpoint lookup {A} {l:list A} (i:index l) :=
 Arguments found [_ _ _].
 Arguments next [_ _ _] _.
 
-Instance indexEqDec {A} {l:list A} : eqDec (index l).
+Global Instance eqDecIndex {A} {l:list A} : eqDec (index l).
   constructor.
-  induction l. {
-    intros i; inversion i.
-  }
   intros i i'.
-  refine(match i as i'' in  index l''
-  return l'' = a::l -> i ~= i'' -> {i = i'} + {i <> i'} 
+  induction l; [inversion i|].
+  refine(match i as ir in index lr
+  return a::l = lr -> forall i':index lr, decide _ ir i'
   with
   | found => _
-  | next ir => _
-  end eq_refl JMeq_refl). 
-  - intros.
-    refine(match i' as i''
-    return i' ~= i'' -> {i = i'} + {i <> i'} 
+  | next im => _
+  end eq_refl i'). 
+  - clear IHl i i'.
+    intros _.
+    clear a l.
+    intros i'.
+    rename a0 into a.
+    rename l0 into l.
+    refine(match i' as ir' in index lr
+    return match lr as lr return index lr -> Type with
+           | [] => fun _ => False
+           | am :: lm => fun i' : index (am :: lm) => decide eq found i'
+           end ir'
     with
     | found => _
-    | next ir' => _
-    end JMeq_refl). 
-    + intros.
+    | next _ => _
+    end).
+    + compute.
       left.
-      apply ADMIT.
-    + intros.      
+      reflexivity.
+    + compute.
       right.
-      apply ADMIT.
-  - intros.
-    refine(match i' as i'' in index l''
-    return l'' = a::l -> i' ~= i'' -> {i = i'} + {i <> i'} 
+      intro h; inversion h.
+  - clear i'.
+    intros e i'.
+    inversion e; clear e.
+    subst.
+    rename a0 into a.
+    rename l0 into l.
+    clear i.
+    refine(match i' as ir' in index lr
+    return a::l = lr -> match lr as lr return index lr -> Type with
+                       | [] => fun _ => False
+                       | am :: lm => fun i' : index (am :: lm) => forall im, decide eq (next im) i'
+                       end ir'
     with
     | found => _
-    | next ir' => _
-    end eq_refl JMeq_refl). 
-    + intros.
+    | next im' => _
+    end eq_refl im).
+    + compute.
+      intros.
       right.
-      apply ADMIT.
-    + intros.      
-      inversion H; clear H.
-      inversion H1; clear H1.
+      intro h; inversion h.
+    + clear im.
+      intros e im.
+      inversion e; clear e.
       subst.
-      destruct (IHl ir ir').
-      * left.
-        apply ADMIT.
-      * right.
-        apply ADMIT.
+      destruct (IHl im im').
+      * subst.
+        left.
+        reflexivity.
+      * compute in *.
+        right.
+        intro e; inversion e.
+        crush.
+Defined. 
+
+Global Instance enumerableIndex {A} {l:list A}: enumerable (index l) := {| 
+  enumerate := (fix rec l := match l return list (index l) with 
+    | [] => []
+    | a::l' => found :: @next _ _ _ <$> rec l'
+    end) l
+|}.
+Proof.
+  intros i.
+  induction i.
+  - cbn.
+    left.
+    reflexivity.
+  - cbn.
+    right.
+    apply in_map.
+    intuition.
 Defined.
+
