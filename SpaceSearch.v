@@ -4,6 +4,7 @@ Require Import JamesTactics.
 Require Import Misc.
 Require Import ListEx.
 Require Import EqDec.
+Require Import Enumerable.
 Import ListNotations.
 
 Class SpaceSearch := {
@@ -198,4 +199,10 @@ Proof.
     * cbn.
       intuition.
     * inversion H.
+Defined.
+
+Global Instance enumerableFree {A} `{@Free listSpaceSearch A} : enumerable A.
+  refine {| enumerate := free A |}.
+Proof.
+  exact freeOk.
 Defined.

@@ -10,6 +10,7 @@ Require Import KonneTactics.
 Require Import Coq.Program.Basics.
 Require Import Equality.
 Require Import List.
+Require Import Ascii.
 Import EqNotations.
 
 Class eqDec A := {
@@ -85,3 +86,13 @@ Global Instance eqDecUnit : eqDec unit.
   decide equality.
 Defined.
 
+Global Instance eqDecZ : eqDec Z.
+  constructor.
+  decide equality;
+  decide equality.
+Defined.
+
+Global Instance eqDecAscii : eqDec ascii.
+  constructor.
+  apply ascii_dec.
+Defined.

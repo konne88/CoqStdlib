@@ -28,4 +28,5 @@ Defined.
 
 Axiom ADMIT : forall A, A.
 
+Definition decide {A} R (a a':A) := {R a a'} + {R a a' -> False}.
 
