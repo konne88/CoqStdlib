@@ -93,6 +93,37 @@ Section SpaceSearch.
     reflexivity.
   Defined.
 
+  Global Instance freeListIn {A} l : Free {a:A | In a l}.
+    refine {| free := _ |}.
+    refine (list_rect (fun l => Space {a:A | In a l}) empty (fun a l' S => _) l).
+    refine (union (single (exist _ a _)) 
+             (bind S (fun p => 
+             (single (exist (fun a' => In a' (a::l')) (proj1_sig p) _))))).
+  Proof.
+  - cbn.
+    left.
+    reflexivity.
+  - cbn.
+    right.
+    exact (proj2_sig p).
+  - induction l as [|a l IHl].
+    * intros [? []].
+    * intros [a' l'].
+      cbn in *.
+      rewrite <- unionOk.
+      destruct l'.
+      + subst.
+        left.
+        apply singleOk.
+        reflexivity.
+      + right.
+        specialize (IHl (exist _ a' i)).
+        rewrite <- bindOk.
+        eexists.
+        split; [apply IHl|].
+        apply singleOk.
+        reflexivity.
+  Defined.
 End SpaceSearch.
 
 Arguments free [_] _ [_].
