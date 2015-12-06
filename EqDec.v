@@ -11,6 +11,7 @@ Require Import Coq.Program.Basics.
 Require Import Equality.
 Require Import List.
 Require Import Ascii.
+Require Import String.
 Import EqNotations.
 
 Class eqDec A := {
@@ -95,4 +96,9 @@ Defined.
 Global Instance eqDecAscii : eqDec ascii.
   constructor.
   apply ascii_dec.
+Defined.
+
+Global Instance eqDecString : eqDec string.
+  constructor.
+  apply string_dec.
 Defined.

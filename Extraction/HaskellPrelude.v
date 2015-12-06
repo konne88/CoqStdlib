@@ -16,6 +16,7 @@ Extract Inductive unit => "()" [ "()" ].
 Extract Inductive string => "[Prelude.Char]" [ "([])" "(:)" ].
 Extract Inlined Constant String.length => "((\l -> Prelude.toInteger (Prelude.length l)))".
 Extract Inlined Constant String.get => "(\i l -> if i Prelude.< Prelude.toInteger (Prelude.length l) then Prelude.Just (l Prelude.!! (Prelude.fromIntegral i)) else Prelude.Nothing)".
+Extract Inlined Constant string_dec => "(Prelude.==)".
 
 Extract Inductive ascii => "Prelude.Char" [ "\b0 b1 b2 b3 b4 b5 b6 b7 -> let s b = Prelude.flip (if b then Data.Bits.setBit else Data.Bits.clearBit) in castCCharToChar (s b0 0 (s b1 1 (s b2 2 (s b3 3 (s b4 4 (s b5 5 (s b6 6 (s b7 7 zeroBits))))))))" ].
 Extract Inlined Constant ascii_dec => "(Prelude.==)".
