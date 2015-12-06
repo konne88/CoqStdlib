@@ -12,13 +12,12 @@ Extract Inductive bool => "Prelude.Bool" [ "Prelude.True" "Prelude.False" ].
 Extract Inductive option => "Prelude.Maybe" [ "Prelude.Just" "Prelude.Nothing" ].
 
 Extract Inductive unit => "()" [ "()" ].
-Extract Inlined Constant id => "(Prelude.id)".
 
-Extract Inductive string => "[Char]" [ "([])" "(:)" ].
+Extract Inductive string => "[Prelude.Char]" [ "([])" "(:)" ].
 Extract Inlined Constant String.length => "((\l -> Prelude.toInteger (Prelude.length l)))".
-Extract Inlined Constant String.get => "(!!)".
+Extract Inlined Constant String.get => "(\i l -> if i Prelude.< Prelude.toInteger (Prelude.length l) then Prelude.Just (l Prelude.!! (Prelude.fromIntegral i)) else Prelude.Nothing)".
 
-Extract Inductive ascii => "Char" [ "\b0 b1 b2 b3 b4 b5 b6 b7. let s b = flip (if b then setBit else clearBit) in castCCharToChar (s b0 0 (s b1 1 (s b2 2 (s b3 3 (s b4 4 (s b5 5 (s b6 6 (s b7 7 zeroBits))))))))" ].
+Extract Inductive ascii => "Prelude.Char" [ "\b0 b1 b2 b3 b4 b5 b6 b7 -> let s b = Prelude.flip (if b then Data.Bits.setBit else Data.Bits.clearBit) in castCCharToChar (s b0 0 (s b1 1 (s b2 2 (s b3 3 (s b4 4 (s b5 5 (s b6 6 (s b7 7 zeroBits))))))))" ].
 Extract Inlined Constant ascii_dec => "(Prelude.==)".
 
 Extract Inductive list => "([])" [ "([])" "(:)" ].
@@ -29,8 +28,6 @@ Extract Inlined Constant rev => "Prelude.reverse".
 Extract Inductive prod => "(,)" [ "(,)" ].
 Extract Inlined Constant fst => "Prelude.fst".
 Extract Inlined Constant snd => "Prelude.snd".
-
-Extract Inlined Constant compose => "(Prelude..)".
 
 Extract Inductive sumbool => "Prelude.Bool" [ "Prelude.True" "Prelude.False" ].
 Extract Inductive sum => "Prelude.Either" [ "Prelude.Left" "Prelude.Right" ].
@@ -45,8 +42,9 @@ Extract Inductive positive => "Prelude.Integer" [
   "1"
 ].
 
-Extract Inductive nat => "Prelude.Integer" ["0" "(+1)"].
-Extract Inlined Constant Nat.sub => "(\n m. Prelude.max (n - m) 0)".
+Extract Inductive nat => "Prelude.Integer" ["0" "(Prelude.+ 1)"].
+
+Extract Inlined Constant Init.Nat.sub => "(\n m -> Prelude.max (n Prelude.- m) 0)".
 
 Extract Inductive Z => "Prelude.Integer" ["0" "" "Prelude.negate"].
 Extract Constant Z.succ => "Prelude.succ".
